@@ -463,6 +463,7 @@ Only one instance of a specific ColdBox application exists.
 
 			// Validate the incoming event and get a handler bean to continue execution
 			ehBean = getHandlerService().getRegisteredHandler(arguments.event);
+
 			// Is this a private event execution?
 			ehBean.setIsPrivate(arguments.private);
 			// Now get the correct handler to execute

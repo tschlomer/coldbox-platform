@@ -277,9 +277,10 @@ Description :
 		<cfscript>
 			// Default path is the conventions
 			var layoutPath 	  		= "/#instance.appMapping#/#instance.layoutsConvention#/#arguments.layout#";
-			var extLayoutPath 		= "#instance.layoutsExternalLocation#/#arguments.layout#";
+			var extLayoutPath 		= "";
 			var moduleName 			= event.getCurrentModule();
 			var moduleLayoutPath 	= "";
+			var i = 0;
 
 			// If layout exists in module and this is a module call, then use module layout.
 			if( len(moduleName) ){
@@ -288,12 +289,21 @@ Description :
 					return moduleLayoutPath;
 				}
 			}
-
-			// Check if layout does not exists in Conventions, but in the ext location
-			if( NOT fileExists(expandPath(layoutPath)) AND fileExists(expandPath(extLayoutPath)) ){
-				return extLayoutPath;
+			if(isSimpleValue(instance.layoutsExternalLocation)) {
+				extLayoutPath = "#instance.layoutsExternalLocation#/#arguments.layout#";
+				// Check if layout does not exists in Conventions, but in the ext location
+				if( NOT fileExists(expandPath(layoutPath)) AND fileExists(expandPath(extLayoutPath)) ){
+					return extLayoutPath;
+				}
+			} else {
+				for(i=1;i LTE ArrayLen(instance.layoutsExternalLocation);i=i+1){
+					extLayoutPath = "#instance.layoutsExternalLocation[i]#/#arguments.layout#";
+					// Check if view does not exists in Conventions
+					if( NOT fileExists(expandPath(layoutPath)) AND fileExists(expandPath(extLayoutPath)) ){
+						return extLayoutPath;
+					}
+				}
 			}
-
 			return layoutPath;
 		</cfscript>
 	</cffunction>
@@ -311,7 +321,7 @@ Description :
 			if( len(arguments.module) ){
 				return "#instance.modulesConfig[arguments.module].mapping#/#instance.modulesConfig[arguments.module].conventions.layoutsLocation#/#arguments.layout#";
 			}
-			
+
 			// Declare Locations
 			moduleName 	     = event.getCurrentModule();
 			parentLayoutPath = "/#instance.appMapping#/#instance.layoutsConvention#/modules/#moduleName#/#arguments.layout#";
@@ -350,11 +360,24 @@ Description :
 		<cfscript>
 			// Default path is the conventions
 			var viewPath 	= "/#instance.appMapping#/#instance.viewsConvention#/#arguments.view#";
-			var extViewPath = "#instance.viewsExternalLocation#/#arguments.view#";
+			var extViewPath = "";
+			var i = 0;
+			if(isSimpleValue(instance.viewsExternalLocation)) {
+				extViewPath = "#instance.viewsExternalLocation#/#arguments.view#";
 
-			// Check if view does not exists in Conventions
-			if( NOT fileExists(expandPath(viewPath & ".cfm")) AND fileExists(expandPath(extViewPath & ".cfm")) ){
-				return extViewPath;
+				// Check if view does not exists in Conventions
+				if( NOT fileExists(expandPath(viewPath & ".cfm")) AND fileExists(expandPath(extViewPath & ".cfm")) ){
+					return extViewPath;
+				}
+			} else {
+				for(i=1;i LTE ArrayLen(instance.viewsExternalLocation);i=i+1){
+					extViewPath = "#instance.viewsExternalLocation[i]#/#arguments.view#";
+
+					// Check if view does not exists in Conventions
+					if( NOT fileExists(expandPath(viewPath & ".cfm")) AND fileExists(expandPath(extViewPath & ".cfm")) ){
+						return extViewPath;
+					}
+				}
 			}
 
 			return viewPath;
@@ -369,12 +392,12 @@ Description :
 			var parentViewPath = "";
 			var moduleViewPath = "";
 			var moduleName     = "";
-			
+
 			// Explicit Module view lookup?
 			if( len(arguments.module) ){
 				return "#instance.modulesConfig[arguments.module].mapping#/#instance.modulesConfig[arguments.module].conventions.viewsLocation#/#arguments.view#";
 			}
-				
+
 			// Declare Locations
 			moduleName     = event.getCurrentModule();
 			parentViewPath = "/#instance.appMapping#/#instance.viewsConvention#/modules/#moduleName#/#arguments.view#";
@@ -394,7 +417,7 @@ Description :
 			if( fileExists(expandPath(moduleViewPath & ".cfm")) ){
 				return moduleViewPath;
 			}
-			
+
 
 			// Not found, then just return parent path, let the include throw exception if not found
 			return parentViewPath;
