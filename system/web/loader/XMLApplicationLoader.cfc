@@ -6,7 +6,7 @@ www.coldbox.org | www.luismajano.com | www.ortussolutions.com
 
 Author 	 		: Luis Majano
 Date     		: September 23, 2005
-Description		: 
+Description		:
 
 Loads a coldbox xml configuration file
 
@@ -14,7 +14,7 @@ Loads a coldbox xml configuration file
 <cfcomponent hint="Loads a coldbox xml configuration file" output="false" extends="coldbox.system.web.loader.AbstractApplicationLoader">
 
 <!------------------------------------------- CONSTRUCTOR ------------------------------------------>
-	
+
 	<cfscript>
 		instance = structnew();
 	</cfscript>
@@ -24,17 +24,17 @@ Loads a coldbox xml configuration file
 		<cfargument name="controller" 			type="any" 		required="true" default="" hint="The coldbox application to load the settings into"/>
 		<cfscript>
 			super.init(arguments.controller);
-			
+
 			// Regex for JSON
 			instance.jsonRegex = "^(\{|\[)(.)*(\}|\])$";
 			instance.jsonUtil = createObject("component","coldbox.system.core.util.conversion.JSON").init();
-			
+
 			return this;
 		</cfscript>
 	</cffunction>
 
 <!------------------------------------------- PUBLIC ------------------------------------------>
-	
+
 	<cffunction name="loadConfiguration" access="public" returntype="void" output="false" hint="Parse the application configuration file.">
 		<!--- ************************************************************* --->
 		<cfargument name="overrideAppMapping" type="string" required="false" default="" hint="Only used for unit testing or reparsing of a specific coldbox config file."/>
@@ -45,89 +45,95 @@ Loads a coldbox xml configuration file
 		var coldboxSettings = getColdboxSettings();
 		var configFileLocation = coldboxSettings["ConfigFileLocation"];
 		var configXML = "";
-		
+
 		//Testers
 		var xmlvalidation = "";
 		var errorDetails = "";
 		var i = 1;
-		
-		
+
+
 		/* ::::::::::::::::::::::::::::::::::::::::: CONFIG FILE PARSING & VALIDATION :::::::::::::::::::::::::::::::::::::::::::: */
 		// Validate File
 		if ( not fileExists(configFileLocation) ){
 			getUtil().throwit(message="The Config File: #ConfigFileLocation# can't be found.",
 							  type="XMLApplicationLoader.ConfigXMLFileNotFoundException");
-		}			
-		
+		}
+
 		// Parse configuration file
 		configXML = xmlParse(ConfigFileLocation);
-		
+
 		/* ::::::::::::::::::::::::::::::::::::::::: APP LOCATION CALCULATIONS :::::::::::::::::::::::::::::::::::::::::::: */
-		
+
 		// load default application paths
 		loadApplicationPaths(configStruct,arguments.overrideAppMapping);
-		
+
 		/* ::::::::::::::::::::::::::::::::::::::::: GET COLDBOX SETTINGS  :::::::::::::::::::::::::::::::::::::::::::: */
 		parseColdboxSettings(configXML,configStruct,arguments.overrideAppMapping);
-		
+
 		/* ::::::::::::::::::::::::::::::::::::::::: YOUR SETTINGS LOADING :::::::::::::::::::::::::::::::::::::::::::: */
-		parseYourSettings(configXML,configStruct);	
-		
+		parseYourSettings(configXML,configStruct);
+
 		/* ::::::::::::::::::::::::::::::::::::::::: YOUR CONVENTIONS LOADING :::::::::::::::::::::::::::::::::::::::::::: */
 		parseConventions(configXML,configStruct);
-		
+
 		/* ::::::::::::::::::::::::::::::::::::::::: MODEL SETTINGS  :::::::::::::::::::::::::::::::::::::::::::: */
 		parseModels(configXML,configStruct);
-		
+
 		/* ::::::::::::::::::::::::::::::::::::::::: MODULE SETTINGS  :::::::::::::::::::::::::::::::::::::::::::: */
 		parseModules(configXML,configStruct);
-		
+
 		/* ::::::::::::::::::::::::::::::::::::::::: IOC SETTINGS  :::::::::::::::::::::::::::::::::::::::::::: */
 		parseIOC(configXML,configStruct);
-		
+
+		/* ::::::::::::::::::::::::::::::::::::::::: EXTERNAL HANDLERS LOCATION :::::::::::::::::::::::::::::::::::::::::::: */
+		parseExternalHandlerLocations(configXML,configStruct);
+
 		/* ::::::::::::::::::::::::::::::::::::::::: HANDLER-MODELS-PLUGIN INVOCATION PATHS :::::::::::::::::::::::::::::::::::::::::::: */
 		parseInvocationPaths(configXML,configStruct);
-		
+
 		/* ::::::::::::::::::::::::::::::::::::::::: EXTERNAL LAYOUTS/VIEWS LOCATION :::::::::::::::::::::::::::::::::::::::::::: */
 		parseExternalLocations(configXML,configStruct);
-		
+
+		/* ::::::::::::::::::::::::::::::::::::::::: EXTERNAL PLUGIN LOCATION :::::::::::::::::::::::::::::::::::::::::::: */
+		parseExternalPluginLocations(configXML,configStruct);
+
 		/* ::::::::::::::::::::::::::::::::::::::::: MAIL SETTINGS :::::::::::::::::::::::::::::::::::::::::::: */
-		parseMailSettings(configXML,configStruct);	
-		
+		parseMailSettings(configXML,configStruct);
+
 		/* ::::::::::::::::::::::::::::::::::::::::: I18N SETTINGS :::::::::::::::::::::::::::::::::::::::::::: */
-		parseLocalization(configXML,configStruct);			
-		
+		parseLocalization(configXML,configStruct);
+
 		/* ::::::::::::::::::::::::::::::::::::::::: BUG MAIL SETTINGS :::::::::::::::::::::::::::::::::::::::::::: */
-		parseBugTracers(configXML,configStruct);			
-		
+		parseBugTracers(configXML,configStruct);
+
 		/* ::::::::::::::::::::::::::::::::::::::::: WS SETTINGS :::::::::::::::::::::::::::::::::::::::::::: */
-		parseWebservices(configXML,configStruct);			
+		parseWebservices(configXML,configStruct);
 
 		/* ::::::::::::::::::::::::::::::::::::::::: DATASOURCES SETTINGS :::::::::::::::::::::::::::::::::::::::::::: */
 		parseDatasources(configXML,configStruct);
-		
+
 		/* ::::::::::::::::::::::::::::::::::::::::: LAYOUT VIEW FOLDER SETTINGS :::::::::::::::::::::::::::::::::::::::::::: */
-		parseLayoutsViews(configXML,configStruct);			
-		
+		parseLayoutsViews(configXML,configStruct);
+
 		/* :::::::::::::::::::::::::::::::::::::::::  CACHE SETTINGS :::::::::::::::::::::::::::::::::::::::::::: */
 		parseCacheSettings(configXML,configStruct);
-					
+
 		/* ::::::::::::::::::::::::::::::::::::::::: DEBUGGER SETTINGS :::::::::::::::::::::::::::::::::::::::::::: */
-		parsedebuggerSettings(configXML,configStruct);			
-					
+		parsedebuggerSettings(configXML,configStruct);
+
 		/* ::::::::::::::::::::::::::::::::::::::::: INTERCEPTOR SETTINGS :::::::::::::::::::::::::::::::::::::::::::: */
 		parseInterceptors(configXML,configStruct);
-		
+
 		/* ::::::::::::::::::::::::::::::::::::::::: LOGBOX Configuration :::::::::::::::::::::::::::::::::::::::::::: */
 		parseLogBox(configXML,configStruct);
-		
+
 		/* ::::::::::::::::::::::::::::::::::::::::: CONFIG FILE LAST MODIFIED SETTING :::::::::::::::::::::::::::::::::::::::::::: */
 		configStruct.configTimeStamp = getUtil().fileLastModified(ConfigFileLocation);
-		
+
 		/* ::::::::::::::::::::::::::::::::::::::::: XSD VALIDATION :::::::::::::::::::::::::::::::::::::::::::: */
-		
+
 		xmlvalidation = XMLValidate(configXML, coldboxSettings["ConfigFileSchemaLocation"]);
-		
+
 		//Validate Errors
 		if(NOT xmlvalidation.status){
 			for(i = 1; i lte ArrayLen(xmlvalidation.errors); i = i + 1){
@@ -138,13 +144,13 @@ Loads a coldbox xml configuration file
 							  "The error details are: #errorDetails#",
 							  "XMLApplicationLoader.ConfigXMLParsingException");
 		}// if invalid status
-			
-		
+
+
 		//finish by loading configuration
 		getController().setConfigSettings(configStruct);
 		</cfscript>
 	</cffunction>
-	
+
 	<!--- parseColdboxSettings --->
 	<cffunction name="parseColdboxSettings" output="false" access="public" returntype="void" hint="Parse ColdBox Settings">
 		<cfargument name="xml" 		type="any" required="true" hint="The xml object"/>
@@ -155,32 +161,32 @@ Loads a coldbox xml configuration file
 			var fwSettingsStruct = getColdboxSettings();
 			var SettingNodes = XMLSearch(arguments.xml,"//Settings/Setting");
 			var i=1;
-			
+
 			if ( ArrayLen(SettingNodes) eq 0 ){
 				getUtil().throwit(message="No Setting elements could be found in the configuration file.",
 								  type="XMLApplicationLoader.ConfigXMLParsingException");
 			}
-			
+
 			//Insert application settings to Config Struct
 			for (i=1; i lte arrayLen(SettingNodes); i=i+1){
 				configStruct[trim(SettingNodes[i].XMLAttributes["name"])] = getUtil().placeHolderReplacer(trim(SettingNodes[i].XMLAttributes["value"]),configStruct);
 			}
-			
-			// override AppMapping from what user set if passed in via the creation. Mostly for unit testing this is done. 
+
+			// override AppMapping from what user set if passed in via the creation. Mostly for unit testing this is done.
 			if ( len(trim(arguments.overrideAppMapping)) ){
 				configStruct["AppMapping"] = arguments.overrideAppMapping;
 			}
-			
+
 			// Clean the first / if found
 			if(structKeyExists(configStruct,"AppMapping") AND len(configStruct.AppMapping) eq 1 ){
 				configStruct["AppMapping"] = "";
 			}
-			
+
 			/* ::::::::::::::::::::::::::::::::::::::::: COLDBOX SETTINGS VALIDATION :::::::::::::::::::::::::::::::::::::::::::: */
-			
+
 			// Default environment setting.
 			configStruct.Environment = "PRODUCTION";
-			
+
 			//Check for AppName or throw
 			if ( not StructKeyExists(configStruct, "AppName") )
 				getUtil().throwit("There was no 'AppName' setting defined. This is required by the framework.","","XMLApplicationLoader.ConfigXMLParsingException");
@@ -265,12 +271,12 @@ Loads a coldbox xml configuration file
 			if( not structKeyExists(configStruct, "ColdBoxExtensionsLocation") OR not len(configStruct.ColdBoxExtensionsLocation) ){
 				configStruct["ColdBoxExtensionsLocation"] = fwSettingsStruct.ColdBoxExtensionsLocation;
 			}
-			
+
 			// calculate AppMapping if not found in the user configuration file
 			if ( NOT structKeyExists(configStruct, "AppMapping") ){
 				calculateAppMapping(configStruct);
 			}
-			
+
 			// Modules Location
 			if( NOT structKeyExists(configStruct,"ModulesLocation") ){
 				configStruct.ModulesLocation = "";
@@ -278,7 +284,54 @@ Loads a coldbox xml configuration file
 			configStruct.modules = structnew();
 		</cfscript>
 	</cffunction>
-	
+
+	<!--- parseExternalPluginLocations --->
+	<cffunction name="parseExternalPluginLocations" output="false" access="public" returntype="void" hint="Parse External Plugin Location">
+		<cfargument name="xml" 		type="any" required="true" hint="The xml object"/>
+		<cfargument name="config" 	type="struct" required="true" hint="The config struct"/>
+		<cfscript>
+			var configStruct = arguments.config;
+			var i=1;
+			var tester = configStruct["PluginsExternalLocation"];
+			var oJSONUtil = getJSONUtil();
+			var jsonREGEX = getjsonREGEX();
+
+			if( structKeyExists(configStruct,"PluginsExternalLocation") ) {
+				//Test for JSON
+				if( reFindNocase(jsonREGEX,tester) ){
+					configStruct["PluginsExternalLocation"] = oJSONUtil.decode(replace(tester,"'","""","all"));
+				}
+				else{
+					configStruct["PluginsExternalLocation"]	 = tester;
+				}
+			}
+		</cfscript>
+	</cffunction>
+
+	<!--- parseExternalHandlerLocations --->
+	<cffunction name="parseExternalHandlerLocations" output="false" access="public" returntype="void" hint="Parse External Plugin Location">
+		<cfargument name="xml" 		type="any" required="true" hint="The xml object"/>
+		<cfargument name="config" 	type="struct" required="true" hint="The config struct"/>
+		<cfscript>
+			var configStruct = arguments.config;
+			var i=1;
+			var tester = configStruct["HandlersExternalLocation"];
+			var oJSONUtil = getJSONUtil();
+			var jsonREGEX = getjsonREGEX();
+
+			if( structKeyExists(configStruct,"HandlersExternalLocation") ) {
+				//Test for JSON
+				if( reFindNocase(jsonREGEX,tester) ){
+					configStruct["HandlersExternalLocation"] = oJSONUtil.decode(replace(tester,"'","""","all"));
+				}
+				else{
+					configStruct["HandlersExternalLocation"] = tester;
+				}
+			}
+		</cfscript>
+	</cffunction>
+
+
 	<!--- parseYourSettings --->
 	<cffunction name="parseYourSettings" output="false" access="public" returntype="void" hint="Parse Your Settings">
 		<cfargument name="xml" 		type="any" required="true" hint="The xml object"/>
@@ -291,10 +344,10 @@ Loads a coldbox xml configuration file
 			var oUtil = getUtil();
 			var oJSONUtil = getJSONUtil();
 			var jsonREGEX = getjsonREGEX();
-			
+
 			//Insert Your Settings to Config Struct
 			for (i=1; i lte ArrayLen(yourSettingNodes); i=i+1){
-				
+
 				// Check if value attribute exists, else check text.
 				if( structKeyExists(yourSettingNodes[i].XMLAttributes,"value") ){
 					tester = oUtil.placeHolderReplacer(trim(yourSettingNodes[i].XMLAttributes["value"]),configStruct);
@@ -303,7 +356,7 @@ Loads a coldbox xml configuration file
 				if( len(yourSettingNodes[i].XMLText) ){
 					tester = oUtil.placeHolderReplacer(trim(yourSettingNodes[i].XMLText),configStruct);
 				}
-				
+
 				//Test for JSON
 				if( reFindNocase(jsonREGEX,tester) ){
 					configStruct[yourSettingNodes[i].XMLAttributes["name"]] = oJSONUtil.decode(replace(tester,"'","""","all"));
@@ -314,7 +367,7 @@ Loads a coldbox xml configuration file
 			}
 		</cfscript>
 	</cffunction>
-	
+
 	<!--- parseConventions --->
 	<cffunction name="parseConventions" output="false" access="public" returntype="void" hint="Parse Conventions">
 		<cfargument name="xml" 		type="any" required="true" hint="The xml object"/>
@@ -323,7 +376,7 @@ Loads a coldbox xml configuration file
 			var configStruct = arguments.config;
 			var conventions = XMLSearch(arguments.xml,"//Conventions");
 			var fwSettingsStruct = getColdboxSettings();
-			
+
 			if( ArrayLen(conventions) ){
 				// Override conventions on a per found basis.
 				if( structKeyExists(conventions[1],"handlersLocation") ){ fwSettingsStruct["handlersConvention"] = trim(conventions[1].handlersLocation.xmltext); }
@@ -346,7 +399,7 @@ Loads a coldbox xml configuration file
 			var configStruct = arguments.config;
 			var ModelNodes = XMLSearch(arguments.xml,"//Models");
 			var fwSettingsStruct = getColdBoxSettings();
-			
+
 			// Defaults if not overriding
 			if (NOT arguments.isOverride){
 				configStruct.ModelsExternalLocation = "";
@@ -356,42 +409,42 @@ Loads a coldbox xml configuration file
 				configStruct.ModelsStopRecursion = fwSettingsStruct["ModelsStopRecursion"];
 				configStruct.ModelsDefinitionFile = fwSettingsStruct["ModelsDefinitionFile"];
 			}
-			
+
 			//Check if empty
 			if ( ArrayLen(ModelNodes) gt 0 and ArrayLen(ModelNodes[1].XMLChildren) gt 0){
 				//Check for Models External Location
 				if ( structKeyExists(ModelNodes[1], "ExternalLocation") AND len(ModelNodes[1].ExternalLocation.xmltext)){
 					configStruct["ModelsExternalLocation"] = ModelNodes[1].ExternalLocation.xmltext;
-				}		
-							
+				}
+
 				//Check for Models ObjectCaching
 				if ( structKeyExists(ModelNodes[1], "ObjectCaching") AND isBoolean(ModelNodes[1].ObjectCaching.xmltext) ){
 					configStruct["ModelsObjectCaching"] = ModelNodes[1].ObjectCaching.xmltext;
 				}
-				
+
 				//Check for ModelsSetterInjection
 				if ( structKeyExists(ModelNodes[1], "SetterInjection") AND isBoolean(ModelNodes[1].SetterInjection.xmltext) ){
 					configStruct["ModelsSetterInjection"] = ModelNodes[1].SetterInjection.xmltext;
 				}
-				
+
 				//Check for ModelsDICompleteUDF
 				if ( structKeyExists(ModelNodes[1], "DICompleteUDF") AND len(ModelNodes[1].DICompleteUDF.xmltext) ){
 					configStruct["ModelsDICompleteUDF"] =ModelNodes[1].DICompleteUDF.xmltext;
 				}
-				
+
 				//Check for ModelsStopRecursion
 				if ( structKeyExists(ModelNodes[1], "StopRecursion") AND len(ModelNodes[1].StopRecursion.xmltext) ){
 					configStruct["ModelsStopRecursion"] = ModelNodes[1].StopRecursion.xmltext;
 				}
-				
+
 				//Check for ModelsDefinitionFile
 				if ( structKeyExists(ModelNodes[1], "DefinitionFile") AND len(ModelNodes[1].DefinitionFile.xmltext) ){
 					configStruct["ModelsDefinitionFile"] = ModelNodes[1].DefinitionFile.xmltext;
 				}
-			} 
+			}
 		</cfscript>
 	</cffunction>
-	
+
 	<!--- parseIOC --->
 	<cffunction name="parseIOC" output="false" access="public" returntype="void" hint="Parse IOC Integration">
 		<cfargument name="xml" 		  type="any"     required="true" hint="The xml object"/>
@@ -401,7 +454,7 @@ Loads a coldbox xml configuration file
 			var configStruct = arguments.config;
 			var iocNodes = XMLSearch(arguments.xml,"//IOC");
 			var fwSettingsStruct = getColdBoxSettings();
-			
+
 			// Defaults if not overriding
 			if (NOT arguments.isOverride){
 				configStruct.IOCFramework = "";
@@ -411,7 +464,7 @@ Loads a coldbox xml configuration file
 				configStruct.IOCParentFactory = "";
 				configStruct.IOCParentFactoryDefinitionFile = "";
 			}
-			
+
 			//Check if empty
 			if ( ArrayLen(iocNodes) gt 0 and ArrayLen(iocNodes[1].XMLChildren) gt 0){
 				//Check for IOC Framework
@@ -433,11 +486,11 @@ Loads a coldbox xml configuration file
 					if( structKeyExists(iocNodes[1].Framework.xmlAttributes,"type") ){
 						configStruct["IOCParentFactory"] = iocNodes[1].Framework.xmlAttributes.type;
 					}
-				}	
-			} 
+				}
+			}
 		</cfscript>
 	</cffunction>
-	
+
 	<!--- parseInvocationPaths --->
 	<cffunction name="parseInvocationPaths" output="false" access="public" returntype="void" hint="Parse Invocation paths">
 		<cfargument name="xml" 		type="any"    required="true" hint="The xml object"/>
@@ -446,13 +499,15 @@ Loads a coldbox xml configuration file
 			var configStruct = arguments.config;
 			var fwSettingsStruct = getColdBoxSettings();
 			var appMappingAsDots = "";
-			
+			var i = 0;
+			var extHandlerLocation = arrayNew(1);
+
 			// Default Locations for ROOT based apps, which is the default
 			//Parse out the first / to create the invocation Path
 			if ( left(configStruct["AppMapping"],1) eq "/" ){
 				configStruct["AppMapping"] = removeChars(configStruct["AppMapping"],1,1);
 			}
-			
+
 			// Handler Registration
 			configStruct["HandlersInvocationPath"] = reReplace(fwSettingsStruct.handlersConvention,"(/|\\)",".","all");
 			configStruct["HandlersPath"] = fwSettingsStruct.ApplicationPath & fwSettingsStruct.handlersConvention;
@@ -462,10 +517,10 @@ Loads a coldbox xml configuration file
 			// Models Registration
 			configStruct["ModelsInvocationPath"] = reReplace(fwSettingsStruct.ModelsConvention,"(/|\\)",".","all");
 			configStruct["ModelsPath"] = fwSettingsStruct.ApplicationPath & fwSettingsStruct.ModelsConvention;
-			
+
 			//App Mapping Invocation Path
 			appMappingAsDots = reReplace(configStruct["AppMapping"],"(/|\\)",".","all");
-			
+
 			//Set the Handlers,Models, & Custom Plugin Invocation & Physical Path for this Application
 			if( len(configStruct["AppMapping"]) ){
 				// Handler Path Registrations
@@ -481,14 +536,19 @@ Loads a coldbox xml configuration file
 				configStruct["ModelsPath"] = "/" & configStruct.AppMapping & "/#fwSettingsStruct.ModelsConvention#";
 				configStruct["ModelsPath"] = expandPath(configStruct["ModelsPath"]);
 			}
-			
+
 			//Set the Handlers External Configuration Paths
 			configStruct["HandlersExternalLocationPath"] = "";
-			if( len(configStruct["HandlersExternalLocation"]) ){
+			if( isSimpleValue(configStruct["HandlersExternalLocation"]) and len(configStruct["HandlersExternalLocation"]) ){
 				//Expand the external location to get a registration path
 				configStruct["HandlersExternalLocationPath"] = ExpandPath("/" & replace(configStruct["HandlersExternalLocation"],".","/","all"));
+			} else if ( isArray(configStruct["HandlersExternalLocation"]) and arrayLen(configStruct["HandlersExternalLocation"]) ) {
+				for(i=1;i LTE ArrayLen(configStruct["HandlersExternalLocation"]);i=i+1){
+					extHandlerLocation[i] = configStruct["HandlersExternalLocationPath"] = ExpandPath("/" & replace(configStruct["HandlersExternalLocation"][i],".","/","all"));
+				}
+				configStruct["HandlersExternalLocationPath"] = extHandlerLocation;
 			}
-			
+
 			//Configure the modules locations if not set already on config.
 			if( NOT len(configStruct.ModulesLocation) ){
 				if( len(configStruct.AppMapping) ){
@@ -517,27 +577,69 @@ Loads a coldbox xml configuration file
 		<cfscript>
 			var configStruct = arguments.config;
 			var fwSettingsStruct = getColdBoxSettings();
-			
-			// ViewsExternalLocation Setup 
-			if( structKeyExists(configStruct,"ViewsExternalLocation") and len(configStruct["ViewsExternalLocation"]) ){
-				// Verify the locations, do relative to the app mapping first 
+			var oJSONUtil = getJSONUtil();
+			var jsonREGEX = getjsonREGEX();
+			var tester = "";
+
+			if( structKeyExists(configStruct,"ViewsExternalLocation") ) {
+				tester = configStruct["ViewsExternalLocation"];
+				//Test for ViewsExternalLocation JSON
+				if( reFindNocase(jsonREGEX,tester) ){
+					configStruct["ViewsExternalLocation"] = oJSONUtil.decode(replace(tester,"'","""","all"));
+				}
+				else{
+					configStruct["ViewsExternalLocation"] = tester;
+				}
+			}
+
+			if( structKeyExists(configStruct,"LayoutsExternalLocation") ) {
+				tester = configStruct["LayoutsExternalLocation"];
+				//Test for ViewsExternalLocation JSON
+				if( reFindNocase(jsonREGEX,tester) ){
+					configStruct["LayoutsExternalLocation"] = oJSONUtil.decode(replace(tester,"'","""","all"));
+				}
+				else{
+					configStruct["LayoutsExternalLocation"] = tester;
+				}
+			}
+
+			// ViewsExternalLocation Setup
+			if( structKeyExists(configStruct,"ViewsExternalLocation") and isSimpleValue(configStruct["ViewsExternalLocation"]) and len(configStruct["ViewsExternalLocation"]) ){
+				// Verify the locations, do relative to the app mapping first
 				if( directoryExists(fwSettingsStruct.ApplicationPath & configStruct["ViewsExternalLocation"]) ){
 					configStruct["ViewsExternalLocation"] = "/" & configStruct["AppMapping"] & "/" & configStruct["ViewsExternalLocation"];
 				}
 				else if( not directoryExists(expandPath(configStruct["ViewsExternalLocation"])) ){
 					getUtil().throwIt("ViewsExternalLocation could not be found.","The directories tested was relative and expanded using #configStruct['ViewsExternalLocation']#. Please verify your setting.","XMLApplicationLoader.ConfigXMLParsingException");
 				}
-				// Cleanup 
+				// Cleanup
 				if ( right(configStruct["ViewsExternalLocation"],1) eq "/" ){
 					 configStruct["ViewsExternalLocation"] = left(configStruct["ViewsExternalLocation"],len(configStruct["ViewsExternalLocation"])-1);
+				}
+			}
+			else if( structKeyExists(configStruct,"ViewsExternalLocation") and isArray(configStruct["ViewsExternalLocation"]) and arrayLen(configStruct["ViewsExternalLocation"]) ){
+				for(i=1;i LTE ArrayLen(configStruct["ViewsExternalLocation"]);i=i+1){
+					currentLocation = configStruct["ViewsExternalLocation"][i];
+					// Verify the locations, do relative to the app mapping first
+					if( directoryExists(fwSettingsStruct.ApplicationPath & currentLocation) ){
+						currentLocation = "/" & configStruct["AppMapping"] & "/" & currentLocation;
+					}
+					else if( not directoryExists(currentLocation) ){
+						getUtil().throwIt("ViewsExternalLocation could not be found.","The directories tested was relative and expanded using #currentLocation#. Please verify your setting.","XMLApplicationLoader.ConfigXMLParsingException");
+					}
+					// Cleanup
+					if ( right(currentLocation,1) eq "/" ){
+						 currentLocation = left(currentLocation,currentLocation-1);
+					}
+					configStruct["ViewsExternalLocation"][i] = currentLocation;
 				}
 			}
 			else{
 				configStruct["ViewsExternalLocation"] = "";
 			}
-			
+
 			// LayoutsExternalLocation Setup
-			if( structKeyExists(configStruct,"LayoutsExternalLocation") and configStruct["LayoutsExternalLocation"] neq "" ){
+			if( structKeyExists(configStruct,"LayoutsExternalLocation") and isSimpleValue(configStruct["LayoutsExternalLocation"]) and configStruct["LayoutsExternalLocation"] neq "" ){
 				// Verify the locations, do relative to the app mapping first
 				if( directoryExists(fwSettingsStruct.ApplicationPath & configStruct["LayoutsExternalLocation"]) ){
 					configStruct["LayoutsExternalLocation"] = "/" & configStruct["AppMapping"] & "/" & configStruct["LayoutsExternalLocation"];
@@ -548,6 +650,23 @@ Loads a coldbox xml configuration file
 				// Cleanup
 				if ( right(configStruct["LayoutsExternalLocation"],1) eq "/" ){
 					 configStruct["LayoutsExternalLocation"] = left(configStruct["LayoutsExternalLocation"],len(configStruct["LayoutsExternalLocation"])-1);
+				}
+			}
+			else if( structKeyExists(configStruct,"LayoutsExternalLocation") and isArray(configStruct["LayoutsExternalLocation"]) and arrayLen(configStruct["LayoutsExternalLocation"]) ){
+				for(i=1;i LTE ArrayLen(configStruct["LayoutsExternalLocation"]);i=i+1){
+					currentLocation = configStruct["LayoutsExternalLocation"][i];
+					// Verify the locations, do relative to the app mapping first
+					if( directoryExists(fwSettingsStruct.ApplicationPath & currentLocation) ){
+						currentLocation = "/" & configStruct["AppMapping"] & "/" & currentLocation;
+					}
+					else if( not directoryExists(currentLocation) ){
+						getUtil().throwIt("LayoutsExternalLocation could not be found.","The directories tested was relative and expanded using #currentLocation#. Please verify your setting.","XMLApplicationLoader.ConfigXMLParsingException");
+					}
+					// Cleanup
+					if ( right(currentLocation,1) eq "/" ){
+						 currentLocation = left(currentLocation,currentLocation-1);
+					}
+					configStruct["LayoutsExternalLocation"][i] = currentLocation;
 				}
 			}
 			else{
@@ -565,7 +684,7 @@ Loads a coldbox xml configuration file
 			var configStruct = arguments.config;
 			//Mail Settings
 			var MailSettingsNodes = XMLSearch(arguments.xml,"//MailServerSettings");
-			
+
 			// Overrides?
 			if (NOT arguments.isOverride){
 				configStruct.MailServer = "";
@@ -573,25 +692,25 @@ Loads a coldbox xml configuration file
 				configStruct.MailPassword = "";
 				configStruct.MailPort = 25;
 			}
-			
+
 			//Check if empty
 			if ( ArrayLen(MailSettingsNodes) gt 0 and ArrayLen(MailSettingsNodes[1].XMLChildren) gt 0){
 				//Checks
 				if ( structKeyExists(MailSettingsNodes[1], "MailServer") )
 					configStruct.MailServer = trim(MailSettingsNodes[1].MailServer.xmlText);
-				
+
 				//Mail username
 				if ( structKeyExists(MailSettingsNodes[1], "MailUsername") )
 					configStruct.MailUsername = trim(MailSettingsNodes[1].MailUsername.xmlText);
-				
+
 				//Mail password
 				if ( structKeyExists(MailSettingsNodes[1], "MailPassword") )
 					configStruct.MailPassword = trim(MailSettingsNodes[1].MailPassword.xmlText);
-				
+
 				//Mail Port
 				if ( structKeyExists(MailSettingsNodes[1], "MailPort") AND isNumeric(MailSettingsNodes[1].MailPort.xmlText) ){
 					configStruct.MailPort = trim(MailSettingsNodes[1].MailPort.xmlText);
-				}				
+				}
 			}
 		</cfscript>
 	</cffunction>
@@ -607,7 +726,7 @@ Loads a coldbox xml configuration file
 			var i18NSettingNodes = XMLSearch(arguments.xml,"//i18N");
 			var i=1;
 			var DefaultLocale = "";
-			
+
 			if (NOT arguments.isOverride){
 				configStruct.DefaultResourceBundle = "";
 				configStruct.DefaultLocale = "";
@@ -615,21 +734,21 @@ Loads a coldbox xml configuration file
 				configStruct.UnknownTranslation = "";
 				configStruct["using_i18N"] = false;
 			}
-			
+
 			//Check if empty
 			if ( ArrayLen(i18NSettingNodes) gt 0 and ArrayLen(i18NSettingNodes[1].XMLChildren) gt 0){
-				
+
 				//Check for DefaultResourceBundle
 				if ( structKeyExists(i18NSettingNodes[1], "DefaultResourceBundle") AND len(i18NSettingNodes[1].DefaultResourceBundle.xmltext) ){
 					configStruct["DefaultResourceBundle"] = i18NSettingNodes[1].DefaultResourceBundle.xmltext;
 				}
-				
+
 				//Check for DefaultResourceBundle
 				if ( structKeyExists(i18NSettingNodes[1], "DefaultLocale") AND len(i18NSettingNodes[1].DefaultLocale.xmltext) ){
 					defaultLocale = i18NSettingNodes[1].DefaultLocale.xmltext;
 					configStruct["DefaultLocale"] = lcase(listFirst(DefaultLocale,"_")) & "_" & ucase(listLast(DefaultLocale,"_"));
 				}
-				
+
 				//Check for LocaleStorage
 				if ( structKeyExists(i18NSettingNodes[1], "LocaleStorage") AND len(i18NSettingNodes[1].LocaleStorage.xmltext) ){
 					configStruct["LocaleStorage"] = i18NSettingNodes[1].LocaleStorage.xmltext;
@@ -639,12 +758,12 @@ Loads a coldbox xml configuration file
 							   			  type="XMLApplicationLoader.InvalidLocaleStorage");
 					}
 				}
-				
+
 				//Check for DefaultResourceBundle
 				if ( structKeyExists(i18NSettingNodes[1], "UnknownTranslation") AND len(i18NSettingNodes[1].UnknownTranslation.xmltext) ){
 					configStruct["UnknownTranslation"] = i18NSettingNodes[1].UnknownTranslation.xmltext;
 				}
-				
+
 				//set i18n
 				configStruct["using_i18N"] = true;
 			}
@@ -662,14 +781,14 @@ Loads a coldbox xml configuration file
 			var bugNodes = XMLSearch(arguments.xml,"//BugTracerReports");
 			var i=1;
 			var BugEmails = "";
-			
+
 			if( NOT arguments.isOverride ){
 				configStruct.BugEmails = "";
 				configStruct.EnableBugReports = false;
 				configStruct.MailFrom = "";
 				configStruct.CustomEmailBugReport = "";
 			}
-			
+
 			if( arrayLen(bugNodes) gt 0 and ArrayLen(bugNodes[1].XMLChildren) gt 0) {
 				// Mail From
 				if( structKeyExists(bugNodes[1],"MailFrom") and len(bugNodes[1].MailFrom.xmlText) ){
@@ -706,19 +825,19 @@ Loads a coldbox xml configuration file
 			var configStruct = arguments.config;
 			var WebServiceNodes = "";
 			var i=1;
-			
+
 			//Get Web Services From Config.
 			WebServiceNodes = XMLSearch(arguments.xml,"//WebServices/WebService");
-			
+
 			// Defaults unless override
 			if( NOT arguments.isOverride ){
 				configStruct.webservices = structnew();
 			}
-			
+
 			// Init webservices holder structure
 			for (i=1; i lte ArrayLen(WebServiceNodes); i=i+1){
 				configStruct.webservices[WebServiceNodes[i].XMLAttributes["name"]] = trim(WebServiceNodes[i].XMLAttributes["URL"]);
-			}	
+			}
 		</cfscript>
 	</cffunction>
 
@@ -732,15 +851,15 @@ Loads a coldbox xml configuration file
 			var DatasourcesNodes = "";
 			var i=1;
 			var DSNStruct = "";
-			
+
 			//Datasources Support
 			DatasourcesNodes = XMLSearch(arguments.xml,"//Datasources/Datasource");
-			
+
 			// Default if not overriding
 			if( NOT arguments.isOverride ){
 				configStruct.Datasources = structnew();
-			}	
-			
+			}
+
 			//Create Structures
 			for(i=1;i lte ArrayLen(DatasourcesNodes); i=i+1){
 				DSNStruct = structNew();
@@ -752,7 +871,7 @@ Loads a coldbox xml configuration file
 					getUtil().throwit("This datasource entry's alias cannot be blank","","XMLApplicationLoader.ConfigXMLParsingException");
 				else
 					DSNStruct.Alias = Trim(DatasourcesNodes[i].XMLAttributes["Alias"]);
-				
+
 				if ( not structKeyExists(DatasourcesNodes[i].XMLAttributes, "Name") or len(Trim(DatasourcesNodes[i].XMLAttributes["Name"])) eq 0 )
 					getUtil().throwit("This datasource entry's name cannot be blank","","XMLApplicationLoader.ConfigXMLParsingException");
 				else
@@ -761,16 +880,16 @@ Loads a coldbox xml configuration file
 				//Optional Entries.
 				if ( structKeyExists(DatasourcesNodes[i].XMLAttributes, "dbtype") )
 					DSNStruct.DBType = Trim(DatasourcesNodes[i].XMLAttributes["dbtype"]);
-					
+
 				if ( structKeyExists(DatasourcesNodes[i].XMLAttributes, "Username") )
 					DSNStruct.Username = Trim(DatasourcesNodes[i].XMLAttributes["username"]);
-					
+
 				if ( structKeyExists(DatasourcesNodes[i].XMLAttributes, "password") )
 					DSNStruct.Password = Trim(DatasourcesNodes[i].XMLAttributes["password"]);
-				
+
 				//Insert to structure with Alias as key
 				configStruct.Datasources[DSNStruct.Alias] = DSNStruct;
-			}	
+			}
 		</cfscript>
 	</cffunction>
 
@@ -786,25 +905,25 @@ Loads a coldbox xml configuration file
 			var Layout = "";
 			var i=1;
 			var j=1;
-			var Collections = createObject("java", "java.util.Collections"); 
+			var Collections = createObject("java", "java.util.Collections");
 			var	LayoutViewStruct = Collections.synchronizedMap(CreateObject("java","java.util.LinkedHashMap").init());
 			var	LayoutFolderStruct = Collections.synchronizedMap(CreateObject("java","java.util.LinkedHashMap").init());
-			
+
 			// Registered Layouts
 			configStruct.registeredLayouts = structnew();
-			
+
 			//Layout into Config
 			DefaultLayout = XMLSearch(arguments.xml,"//Layouts/DefaultLayout");
-			
+
 			//validate Default Layout.
 			if ( ArrayLen(DefaultLayout) eq 0 )
 				getUtil().throwit("There was no default layout element found.","","XMLApplicationLoader.ConfigXMLParsingException");
 			if ( ArrayLen(DefaultLayout) gt 1 )
 				getUtil().throwit("There were more than 1 DefaultLayout elements found. There can only be one.","","XMLApplicationLoader.ConfigXMLParsingException");
-			
+
 			//Insert Default Layout
 			configStruct.DefaultLayout = trim(DefaultLayout[1].XMLText);
-			
+
 			//Default View into Config
 			DefaultView = XMLSearch(arguments.xml,"//Layouts/DefaultView");
 			// Default view
@@ -813,7 +932,7 @@ Loads a coldbox xml configuration file
 			if( arrayLen(defaultView) ){
 				configStruct["DefaultView"] = trim(DefaultView[1].XMLText);
 			}
-			
+
 			//Get View Layouts
 			LayoutNodes = XMLSearch(arguments.xml,"//Layouts/Layout");
 			for (i=1; i lte ArrayLen(LayoutNodes); i=i+1){
@@ -832,13 +951,13 @@ Loads a coldbox xml configuration file
 						if ( not StructKeyExists(LayoutFolderStruct, lcase(Trim(LayoutNodes[i].XMLChildren[j].XMLText))) )
 							LayoutFolderStruct[lcase(Trim(LayoutNodes[i].XMLChildren[j].XMLText))] = Layout;
 					}
-					
+
 				}//end for loop for the layout children
-				
+
 				// Register Layout Aliases
 				configStruct.registeredLayouts[Trim(LayoutNodes[i].XMLAttributes["name"])] = Trim(LayoutNodes[i].XMLAttributes["file"]);
 			}//end for loop of all layout nodes
-			
+
 			configStruct.ViewLayouts = LayoutViewStruct;
 			configStruct.FolderLayouts = LayoutFolderStruct;
 		</cfscript>
@@ -853,10 +972,10 @@ Loads a coldbox xml configuration file
 			var configStruct = arguments.config;
 			var cacheSettingNodes  = "";
 			var fwSettingsStruct = getColdboxSettings();
-			
+
 			//Cache Override Settings
 			cacheSettingNodes = XMLSearch(arguments.xml,"//Cache");
-			
+
 			// Defaults if not overriding from global framework settings
 			if (NOT arguments.isOverride){
 				configStruct.cacheSettings = structnew();
@@ -867,55 +986,55 @@ Loads a coldbox xml configuration file
 				configStruct.cacheSettings.useLastAccessTimeouts 		  = fwSettingsStruct.cacheUseLastAccessTimeouts;
 				configStruct.cacheSettings.evictionPolicy 				  = fwSettingsStruct.cacheEvictionPolicy;
 				configStruct.cacheSettings.evictCount					  = fwSettingsStruct.cacheEvictCount;
-				configStruct.cacheSettings.maxObjects					  = fwSettingsStruct.cacheMaxObjects;	
+				configStruct.cacheSettings.maxObjects					  = fwSettingsStruct.cacheMaxObjects;
 			}
-			
+
 			//Check if empty
 			if ( ArrayLen(cacheSettingNodes) gt 0 and ArrayLen(cacheSettingNodes[1].XMLChildren) gt 0){
 				//Checks For Default Timeout
 				if ( structKeyExists(cacheSettingNodes[1], "ObjectDefaultTimeout") and isNumeric(cacheSettingNodes[1].ObjectDefaultTimeout.xmlText) ){
 					configStruct.cacheSettings.objectDefaultTimeout = trim(cacheSettingNodes[1].ObjectDefaultTimeout.xmlText);
 				}
-				
+
 				//Check ObjectDefaultLastAccessTimeout
 				if ( structKeyExists(cacheSettingNodes[1], "ObjectDefaultLastAccessTimeout") and isNumeric(cacheSettingNodes[1].ObjectDefaultLastAccessTimeout.xmlText)){
 					configStruct.cacheSettings.objectDefaultLastAccessTimeout = trim(cacheSettingNodes[1].ObjectDefaultLastAccessTimeout.xmlText);
 				}
-				
+
 				//Check ReapFrequency
 				if ( structKeyExists(cacheSettingNodes[1], "ReapFrequency") and isNumeric(cacheSettingNodes[1].ReapFrequency.xmlText)){
 					configStruct.cacheSettings.reapFrequency = trim(cacheSettingNodes[1].ReapFrequency.xmlText);
 				}
-				
+
 				//Check MaxObjects
 				if ( structKeyExists(cacheSettingNodes[1], "MaxObjects") and isNumeric(cacheSettingNodes[1].MaxObjects.xmlText)){
 					configStruct.cacheSettings.maxObjects = trim(cacheSettingNodes[1].MaxObjects.xmlText);
 				}
-				
+
 				//Check FreeMemoryPercentageThreshold
 				if ( structKeyExists(cacheSettingNodes[1], "FreeMemoryPercentageThreshold") and isNumeric(cacheSettingNodes[1].FreeMemoryPercentageThreshold.xmlText)){
 					configStruct.cacheSettings.freeMemoryPercentageThreshold = trim(cacheSettingNodes[1].FreeMemoryPercentageThreshold.xmlText);
 				}
-				
+
 				//Check for CacheUseLastAccessTimeouts
 				if ( structKeyExists(cacheSettingNodes[1], "UseLastAccessTimeouts") and isBoolean(cacheSettingNodes[1].UseLastAccessTimeouts.xmlText) ){
 					configStruct.cacheSettings.useLastAccessTimeouts = trim(cacheSettingNodes[1].UseLastAccessTimeouts.xmlText);
 				}
-				
+
 				//Check for CacheEvictionPolicy
 				if ( structKeyExists(cacheSettingNodes[1], "EvictionPolicy") ){
 					configStruct.cacheSettings.evictionPolicy = trim(cacheSettingNodes[1].EvictionPolicy.xmlText);
 				}
-				
+
 				//Check for CacheEvictCount
-				if ( structKeyExists(cacheSettingNodes[1], "EvictCount") and 
+				if ( structKeyExists(cacheSettingNodes[1], "EvictCount") and
 					 isNumeric(trim(cacheSettingNodes[1].evictCount.xmlText)) and
 					 trim(cacheSettingNodes[1].evictCount.xmlText) gt 0 ){
 					configStruct.cacheSettings.evictCount = trim(cacheSettingNodes[1].evictCount.xmlText);
 				}
 			}
 		</cfscript>
-	</cffunction>	
+	</cffunction>
 
 	<!--- parsedebuggerSettings --->
 	<cffunction name="parseDebuggerSettings" output="false" access="public" returntype="void" hint="Parse Debugger Settings">
@@ -926,9 +1045,9 @@ Loads a coldbox xml configuration file
 			var configStruct = arguments.config;
 			var debuggerSettingNodes = "";
 			var fwSettings = getColdBoxSettings();
-			
+
 			debuggerSettingNodes = XMLSearch(arguments.xml,"//DebuggerSettings");
-			
+
 			if (NOT arguments.isOverride){
 				configStruct.debuggerSettings = structnew();
 				configStruct.debuggerSettings.enableDumpVar 				= fwSettings.enableDumpVar;
@@ -946,7 +1065,7 @@ Loads a coldbox xml configuration file
 				configStruct.debuggerSettings.showModulesPanel 				= fwSettings.showModulesPanel;
 				configStruct.debuggerSettings.expandedModulesPanel			= fwSettings.expandedModulesPanel;
 			}
-			
+
 			//Check if empty
 			if ( ArrayLen(DebuggerSettingNodes) ){
 				// EnableDumpVar
@@ -984,11 +1103,11 @@ Loads a coldbox xml configuration file
 				// ModulesPanel
 				if ( structKeyExists(DebuggerSettingNodes[1], "ModulesPanel") ){
 					debugPanelAttributeInsert(configStruct.debuggerSettings,"ModulesPanel",DebuggerSettingNodes[1].ModulesPanel.xmlAttributes);
-				}							
+				}
 			}
 		</cfscript>
-	</cffunction>		
-	
+	</cffunction>
+
 	<!--- parseInterceptors --->
 	<cffunction name="parseInterceptors" output="false" access="public" returntype="void" hint="Parse Interceptors">
 		<cfargument name="xml" 		type="any" required="true" hint="The xml object"/>
@@ -1005,30 +1124,30 @@ Loads a coldbox xml configuration file
 			var tempProperty = "";
 			var oUtil = getUtil();
 			var oJSONUtil = getJSONUtil();
-			
+
 			//Search for Interceptors
 			interceptorBase = XMLSearch(arguments.xml,"//Interceptors");
-			
+
 			if (NOT arguments.isOverride){
 				// Interceptor Defaults.
 				configStruct.interceptorConfig = structnew();
 				configStruct.interceptorConfig.interceptors = arrayNew(1);
 				configStruct.interceptorConfig.throwOnInvalidStates = false;
-				configStruct.interceptorConfig.customInterceptionPoints = "";				
+				configStruct.interceptorConfig.customInterceptionPoints = "";
 			}
-			
+
 			if( arrayLen(interceptorBase) ){
 				// Invalid States
 				if ( structKeyExists(interceptorBase[1].XMLAttributes, "throwOnInvalidStates") ){
 					configStruct.interceptorConfig['throwOnInvalidStates'] = interceptorBase[1].XMLAttributes.throwOnInvalidStates;
 				}
-				
+
 				// Custom Interception Points
 				customInterceptionPoints = XMLSearch(arguments.xml,"//Interceptors/CustomInterceptionPoints");
 				if( arraylen(customInterceptionPoints) ){
 					configStruct.interceptorConfig.customInterceptionPoints = oUtil.placeHolderReplacer(Trim(customInterceptionPoints[1].XMLText),configStruct);
 				}
-				
+
 				//Parse all Interceptor Nodes now.
 				interceptorNodes = XMLSearch(arguments.xml,"//Interceptors/Interceptor");
 				for (i=1; i lte ArrayLen(interceptorNodes); i=i+1){
@@ -1055,14 +1174,14 @@ Loads a coldbox xml configuration file
 								interceptorStruct.properties[Trim(interceptorNodes[i].XMLChildren[j].XMLAttributes["name"])] = tempProperty;
 							}
 						}//end loop of properties
-					}//end if no properties					
+					}//end if no properties
 					//Add to Array
 					ArrayAppend( configStruct.interceptorConfig.interceptors, interceptorStruct );
-				}//end interceptor nodes				
+				}//end interceptor nodes
 			}
 		</cfscript>
 	</cffunction>
-	
+
 	<!--- parseLogBox --->
 	<cffunction name="parseLogBox" output="false" access="public" returntype="void" hint="Parse LogBox">
 		<cfargument name="xml" 		type="any" required="true" hint="The xml object"/>
@@ -1077,16 +1196,16 @@ Loads a coldbox xml configuration file
 			var appRootPath 	 = getController().getAppRootPath();
 			var appMappingAsDots = "";
 			var configCreatePath  = "config.LogBox";
-			
+
 			// Default
 			if( NOT arguments.isOverride){
 				arguments.config["LogBoxConfig"] = structnew();
 			}
-			
+
 			if( arrayLen(logboxXML) ){
 				// Reset the configuration
 				logBoxConfig.reset();
-				
+
 				// Does configFile exists
 				if( structKeyExists(logboxXML[1], "ConfigFile") ){
 					// Load by file
@@ -1097,7 +1216,7 @@ Loads a coldbox xml configuration file
 					logBoxConfig.parseAndLoad(logboxXML[1]);
 					// Get reference to do ${} replacements
 					memento = logBoxConfig.getMemento();
-					
+
 					// Appender Replacements
 					for( key in memento.appenders ){
 						memento.appenders[key].class = oUtil.placeHolderReplacer(memento.appenders[key].class,arguments.config);
@@ -1107,10 +1226,10 @@ Loads a coldbox xml configuration file
 							memento.appenders[key].properties[prop] = oUtil.placeHolderReplacer(memento.appenders[key].properties[prop],arguments.config);
 						}
 					}
-				}			
-				
+				}
+
 				//Store LogBox Configuration on settings
-				arguments.config["LogBoxConfig"] = logBoxConfig.getMemento();		
+				arguments.config["LogBoxConfig"] = logBoxConfig.getMemento();
 			}
 			// Check if LogBox.cfc exists in the config conventions and load it.
 			else if( fileExists( appRootPath & "config/LogBox.cfc") ){
@@ -1118,7 +1237,7 @@ Loads a coldbox xml configuration file
 			}
 		</cfscript>
 	</cffunction>
-	
+
 	<!--- parseModules --->
 	<cffunction name="parseModules" output="false" access="public" returntype="void" hint="Parse Module Settings">
 		<cfargument name="xml" 		  type="any"     required="true" hint="The xml object"/>
@@ -1128,7 +1247,7 @@ Loads a coldbox xml configuration file
 			var configStruct  = arguments.config;
 			// Module Settings
 			var moduleSettingsNodes = XMLSearch(arguments.xml,"//Modules");
-			
+
 			// Defaults if not overriding from global framework settings
 			if (NOT arguments.isOverride){
 				// Defaults
@@ -1136,7 +1255,7 @@ Loads a coldbox xml configuration file
 				configStruct.ModulesInclude		= "";
 				configStruct.ModulesExclude		= "";
 			}
-			
+
 			//Check if empty
 			if ( ArrayLen(moduleSettingsNodes) gt 0 and ArrayLen(moduleSettingsNodes[1].XMLChildren) gt 0){
 				//Checks For AutoReload
@@ -1151,22 +1270,22 @@ Loads a coldbox xml configuration file
 				if ( structKeyExists(moduleSettingsNodes[1], "Exclude") ){
 					configStruct.modulesExclude = trim(moduleSettingsNodes[1].Exclude.xmlText);
 				}
-			}						
+			}
 		</cfscript>
-	</cffunction>	
-	
+	</cffunction>
+
 	<!--- JSON REGEX --->
 	<cffunction name="getJSONRegex" access="public" returntype="string" output="false" hint="Get the json regex string">
 		<cfreturn instance.jsonRegex>
 	</cffunction>
-	
+
 	<!--- getJSONUtil --->
 	<cffunction name="getJSONUtil" access="public" output="false" returntype="coldbox.system.core.util.conversion.JSON" hint="Create and return a util object for JSON">
 		<cfreturn instance.jsonUtil/>
 	</cffunction>
 
 <!------------------------------------------- PRIVATE ------------------------------------------>
-	
+
 	<!--- Debug Panel attribute insert --->
 	<cffunction name="debugPanelAttributeInsert" access="private" returntype="void" hint="Insert a key into a panel attribute" output="false" >
 		<!--- ************************************************************* --->
@@ -1178,11 +1297,11 @@ Loads a coldbox xml configuration file
 			// Show Key
 			if( structKeyExists(arguments.panelXML,"show") ){
 				arguments.config["show#arguments.Panel#"] = trim(arguments.panelXML.show);
-			}	
+			}
 			// Expanded Key
 			if( structKeyExists(arguments.panelXML,"expanded") ){
 				arguments.config["expanded#arguments.Panel#"] = trim(arguments.panelXML.expanded);
-			}		
+			}
 		</cfscript>
 	</cffunction>
 
