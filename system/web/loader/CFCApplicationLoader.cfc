@@ -319,6 +319,11 @@ Loads a coldbox xml configuration file
 			configStruct.ModelsStopRecursion = fwSettingsStruct["ModelsStopRecursion"];
 			configStruct.ModelsDefinitionFile = fwSettingsStruct["ModelsDefinitionFile"];
 
+			//Convert Model External Location array to list
+			if (structKeyExists(models, "ExternalLocation") AND isArray(models.ExternalLocation)) {
+				models.ExternalLocation = arrayToList(models.ExternalLocation);
+			}
+
 			//Check for Models External Location
 			if ( structKeyExists(models, "ExternalLocation") AND len(models.ExternalLocation)){
 				configStruct["ModelsExternalLocation"] = models.ExternalLocation;

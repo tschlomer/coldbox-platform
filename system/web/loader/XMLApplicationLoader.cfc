@@ -399,6 +399,9 @@ Loads a coldbox xml configuration file
 			var configStruct = arguments.config;
 			var ModelNodes = XMLSearch(arguments.xml,"//Models");
 			var fwSettingsStruct = getColdBoxSettings();
+			var tester = "";
+			var oJSONUtil = getJSONUtil();
+			var jsonREGEX = getjsonREGEX();
 
 			// Defaults if not overriding
 			if (NOT arguments.isOverride){
@@ -414,7 +417,18 @@ Loads a coldbox xml configuration file
 			if ( ArrayLen(ModelNodes) gt 0 and ArrayLen(ModelNodes[1].XMLChildren) gt 0){
 				//Check for Models External Location
 				if ( structKeyExists(ModelNodes[1], "ExternalLocation") AND len(ModelNodes[1].ExternalLocation.xmltext)){
-					configStruct["ModelsExternalLocation"] = ModelNodes[1].ExternalLocation.xmltext;
+					tester = ModelNodes[1].ExternalLocation.xmltext;
+					//Test for JSON
+					if( reFindNocase(jsonREGEX,tester) ){
+						configStruct["ModelsExternalLocation"] = oJSONUtil.decode(replace(tester,"'","""","all"));
+						//Convert the array to a list
+						if (isArray(configStruct["ModelsExternalLocation"])) {
+							configStruct["ModelsExternalLocation"] = arrayToList(configStruct["ModelsExternalLocation"]);
+						}
+					}
+					else{
+						configStruct["ModelsExternalLocation"]	 = tester;
+					}
 				}
 
 				//Check for Models ObjectCaching
