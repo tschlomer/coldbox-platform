@@ -22,6 +22,7 @@ Modification History:
 
 	<cffunction name="init" access="public" output="false" hint="constructor" returntype="DebuggerConfig">
 	    <cfscript>
+		    setDebugTemplate('Traditional');
 		    return this;
 		</cfscript>
 	</cffunction>
@@ -36,7 +37,7 @@ Modification History:
 		<cfargument name="memento" type="struct" required="true"/>
 		<cfset instance = arguments.memento/>
 	</cffunction>
-	
+
 	<!--- enableDumpVar --->
 	<cffunction name="getEnableDumpVar" access="public" output="false" returntype="boolean" hint="Get enableDumpVar">
 		<cfreturn instance.enableDumpVar/>
@@ -45,7 +46,7 @@ Modification History:
 		<cfargument name="enableDumpVar" type="boolean" required="true"/>
 		<cfset instance.enableDumpVar = arguments.enableDumpVar/>
 	</cffunction>
-	
+
 	<!--- Request Profiler --->
 	<cffunction name="getPersistentRequestProfiler" access="public" output="false" returntype="boolean" hint="Get PersistentRequestProfiler">
 		<cfreturn instance.PersistentRequestProfiler/>
@@ -54,7 +55,7 @@ Modification History:
 		<cfargument name="PersistentRequestProfiler" type="boolean" required="true"/>
 		<cfset instance.PersistentRequestProfiler = arguments.PersistentRequestProfiler/>
 	</cffunction>
-	
+
 	<!--- Max Request Profilers --->
 	<cffunction name="getMaxPersistentRequestProfilers" access="public" output="false" returntype="numeric" hint="Get maxPersistentRequestProfilers">
 		<cfreturn instance.maxPersistentRequestProfilers/>
@@ -63,7 +64,7 @@ Modification History:
 		<cfargument name="maxPersistentRequestProfilers" type="numeric" required="true"/>
 		<cfset instance.maxPersistentRequestProfilers = arguments.maxPersistentRequestProfilers/>
 	</cffunction>
-	
+
 	<!--- Max RCPanel query rows --->
 	<cffunction name="getMaxRCPanelQueryRows" access="public" output="false" returntype="numeric" hint="Get maxRCPanelQueryRows">
 		<cfreturn instance.maxRCPanelQueryRows/>
@@ -72,16 +73,16 @@ Modification History:
 		<cfargument name="maxRCPanelQueryRows" type="numeric" required="true"/>
 		<cfset instance.maxRCPanelQueryRows = arguments.maxRCPanelQueryRows/>
 	</cffunction>
-	
+
 	<!--- show Tracer Panel --->
 	<cffunction name="getShowTracerPanel" access="public" output="false" returntype="boolean" hint="Get showTracerPanel">
 		<cfreturn instance.showTracerPanel/>
-	</cffunction>	
+	</cffunction>
 	<cffunction name="setShowTracerPanel" access="public" output="false" returntype="void" hint="Set showTracerPanel">
 		<cfargument name="showTracerPanel" type="boolean" required="true"/>
 		<cfset instance.showTracerPanel = arguments.showTracerPanel/>
 	</cffunction>
-	
+
 	<!--- expanded Tracer Panel --->
 	<cffunction name="getExpandedTracerPanel" access="public" output="false" returntype="boolean" hint="Get expandedTracerPanel">
 		<cfreturn instance.expandedTracerPanel/>
@@ -90,7 +91,7 @@ Modification History:
 		<cfargument name="expandedTracerPanel" type="boolean" required="true"/>
 		<cfset instance.expandedTracerPanel = arguments.expandedTracerPanel/>
 	</cffunction>
-	
+
 	<!--- Show DebugInfo panel --->
 	<cffunction name="getShowInfoPanel" access="public" output="false" returntype="boolean" hint="Get showInfoPanel">
 		<cfreturn instance.showInfoPanel/>
@@ -99,7 +100,7 @@ Modification History:
 		<cfargument name="showInfoPanel" type="boolean" required="true"/>
 		<cfset instance.showInfoPanel = arguments.showInfoPanel/>
 	</cffunction>
-	
+
 	<!--- Expanded info panel --->
 	<cffunction name="getExpandedInfoPanel" access="public" output="false" returntype="boolean" hint="Get expandedInfoPanel">
 		<cfreturn instance.expandedInfoPanel/>
@@ -108,7 +109,7 @@ Modification History:
 		<cfargument name="expandedInfoPanel" type="boolean" required="true"/>
 		<cfset instance.expandedInfoPanel = arguments.expandedInfoPanel/>
 	</cffunction>
-	
+
 	<!--- show CachePanel --->
 	<cffunction name="getShowCachePanel" access="public" output="false" returntype="boolean" hint="Get showCachePanel">
 		<cfreturn instance.showCachePanel/>
@@ -117,7 +118,7 @@ Modification History:
 		<cfargument name="showCachePanel" type="boolean" required="true"/>
 		<cfset instance.showCachePanel = arguments.showCachePanel/>
 	</cffunction>
-	
+
 	<!--- Expanded --->
 	<cffunction name="getExpandedCachePanel" access="public" output="false" returntype="boolean" hint="Get expandedCachePanel">
 		<cfreturn instance.expandedCachePanel/>
@@ -126,7 +127,7 @@ Modification History:
 		<cfargument name="expandedCachePanel" type="boolean" required="true"/>
 		<cfset instance.expandedCachePanel = arguments.expandedCachePanel/>
 	</cffunction>
-	
+
 	<!--- show --->
 	<cffunction name="getShowRCPanel" access="public" output="false" returntype="boolean" hint="Get showRCPanel">
 		<cfreturn instance.showRCPanel/>
@@ -135,7 +136,7 @@ Modification History:
 		<cfargument name="showRCPanel" type="boolean" required="true"/>
 		<cfset instance.showRCPanel = arguments.showRCPanel/>
 	</cffunction>
-	
+
 	<!--- expanded --->
 	<cffunction name="getExpandedRCPanel" access="public" output="false" returntype="boolean" hint="Get expandedRCPanel">
 		<cfreturn instance.expandedRCPanel/>
@@ -144,7 +145,7 @@ Modification History:
 		<cfargument name="expandedRCPanel" type="boolean" required="true"/>
 		<cfset instance.expandedRCPanel = arguments.expandedRCPanel/>
 	</cffunction>
-	
+
 	<!--- Expanded modules Panel --->
 	<cffunction name="getExpandedModulesPanel" access="public" returntype="boolean" output="false">
 		<cfreturn instance.expandedModulesPanel>
@@ -153,7 +154,7 @@ Modification History:
 		<cfargument name="expandedModulesPanel" type="boolean" required="true">
 		<cfset instance.expandedModulesPanel = arguments.expandedModulesPanel>
 	</cffunction>
-	
+
 	<!--- Show Modules Panel --->
 	<cffunction name="getshowModulesPanel" access="public" returntype="boolean" output="false">
 		<cfreturn instance.showModulesPanel>
@@ -162,7 +163,16 @@ Modification History:
 		<cfargument name="showModulesPanel" type="boolean" required="true">
 		<cfset instance.showModulesPanel = arguments.showModulesPanel>
 	</cffunction>
-	
+
+	<!--- View Selection --->
+	<cffunction name="getDebugTemplate" access="public" returntype="string" output="false">
+		<cfreturn instance.debugTemplate>
+	</cffunction>
+	<cffunction name="setDebugTemplate" access="public" returntype="void" output="false">
+		<cfargument name="debugTemplate" type="string" required="true">
+		<cfset instance.debugTemplate = arguments.debugTemplate>
+	</cffunction>
+
 	<!--- Populate from struct --->
 	<cffunction name="populate" access="public" returntype="any" hint="Populate with a memento" output="false">
 		<!--- ************************************************************* --->
@@ -171,7 +181,7 @@ Modification History:
 		<cfscript>
 			var key = "";
 			var udfCall = "";
-			
+
 			// Populate Bean
 			for(key in arguments.memento){
 				/* Check if setter exists */
@@ -180,9 +190,9 @@ Modification History:
 					udfCall(arguments.memento[key]);
 				}
 			}
-			
+
 			return this;
 		</cfscript>
 	</cffunction>
-	
+
 </cfcomponent>
