@@ -22,7 +22,8 @@ Modification History:
 
 	<cffunction name="init" access="public" output="false" hint="constructor" returntype="DebuggerConfig">
 	    <cfscript>
-		    setDebugTemplate('Traditional');
+		    // Set the default template
+		    setDebugTemplate('neo');
 		    return this;
 		</cfscript>
 	</cffunction>
@@ -170,7 +171,7 @@ Modification History:
 	</cffunction>
 	<cffunction name="setDebugTemplate" access="public" returntype="void" output="false">
 		<cfargument name="debugTemplate" type="string" required="true">
-		<cfset instance.debugTemplate = arguments.debugTemplate>
+		<cfset instance.debugTemplate = lcase(trim(arguments.debugTemplate))>
 	</cffunction>
 
 	<!--- Populate from struct --->
