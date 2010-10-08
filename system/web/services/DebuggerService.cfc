@@ -282,7 +282,7 @@ Description :
     	</cfscript>
 
 		<!--- Generate Debugging --->
-		<cfsavecontent variable="content"><cfinclude template="/coldbox/system/includes/panels/CacheReport.cfm"></cfsavecontent>
+		<cfsavecontent variable="content"><cfinclude template="/coldbox/system/includes/templates/#getDebuggerConfig().getDebugTemplate()#/panels/CacheReport.cfm"></cfsavecontent>
 
 		<cfreturn content>
 	</cffunction>
@@ -337,7 +337,7 @@ Description :
     	</cfscript>
 
 		<!--- Render content out --->
-		<cfsavecontent variable="content"><cfinclude template="/coldbox/system/includes/panels/CacheContentReport.cfm"></cfsavecontent>
+		<cfsavecontent variable="content"><cfinclude template="/coldbox/system/includes/templates/#getDebuggerConfig().getDebugTemplate()#/panels/CacheContentReport.cfm"></cfsavecontent>
 
 		<cfreturn content>
     </cffunction>
